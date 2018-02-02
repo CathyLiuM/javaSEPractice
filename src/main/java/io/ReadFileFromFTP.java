@@ -13,9 +13,9 @@ public class ReadFileFromFTP {
 
     private static void getInputStreamFromFtp() throws IOException {
         FTPClient ftpClient = new FTPClient();;
-        String ip = "110.172.211.13";
+        String ip = "";
         String userName = "edi";
-        String userPwd = "edi1qaz@WSX3edc";
+        String userPwd = "";
         String path = "/NIKE/articleinfo";
         String fileName = "Product_20180103185339361.txt";
         String outFileName = "E://testProduct.txt";
