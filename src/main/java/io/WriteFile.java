@@ -15,6 +15,30 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ * 补充：写文件追加方式：
+ 1.
+ RandomAccessFile write = new RandomAccessFile(file,"rw");
+ long len = write.length();
+ write.seek(len);//定位到尾部
+ write.writeBytes(new String(str.getBytes(),"iso8859-1"));
+ 2.
+ FileWriter(,true)//追加
+ 3.
+ FileOutputStream(,true)//追加
+ 4.
+ FileChannel read = new RandomAccessFile(fileName,"r").getChannel();
+ FileChannel writer = new RandomAccessFile(outFileName,"rw").getChannel();
+ ByteBuffer bb = ByteBuffer.allocate(1024);
+ while(read.read(bb)!=-1){
+ bb.flip();//做好让别人来读取字节的准备
+ writer.position(writer.size());//定位到尾部
+ writer.write(bb);
+ bb.clear();
+ }
+ read.close();
+ writer.close();
+ */
 public class WriteFile {
 	
 	/**
@@ -94,12 +118,12 @@ public class WriteFile {
 	　* 程序向流中写出字节时, 不会直接写到文件, 先写到缓冲区中,直到缓冲区写满, BufferedOutputStream才会把缓冲区中的数据一次性写到文件里
 	 *
 	 * @param fileName
-	 * @param out
+	 * @param outFileName
 	 * @throws IOException 
 	 */
 	public static void writeFileByBufferedOutputStream(String fileName,String outFileName) throws IOException{
 		FileInputStream in = new FileInputStream(new File(fileName));
-		FileOutputStream out = new FileOutputStream(new File(outFileName));
+		FileOutputStream out = new FileOutputStream(new File(outFileName),true);
 		
 		BufferedInputStream bis = new BufferedInputStream(in);
 		BufferedOutputStream bos = new BufferedOutputStream(out);
@@ -135,11 +159,12 @@ public class WriteFile {
 	 */
 	public static void main(String[] args) throws IOException{
 		long testTime1 = System.currentTimeMillis();
-//		writeFileByBufferWriter("E://QAP_201711281836.txt","E://out14.txt");//342ms
+		writeFileByBufferWriter("E://QAP_201711281836.txt","E://out14.txt");//342ms
+//		writeFileByPrintWriter("E://QAP_201711281836.txt","E://out13.txt");//290ms
 //		writeFileByPrintWriter("E://QAP_201711281836.txt","E://out13.txt");//290ms
 //		writeFileByFileOutputStream1("E://QAP_201711281836.txt","E://out10.txt");//97589ms
 //		writeFileByFileOutputStream2("E://QAP_201711281836.txt","E://out11.txt");//42ms
-		writeFileByBufferedOutputStream("E://QAP_201711281836.txt","E://out12.txt");//1025ms
+//		writeFileByBufferedOutputStream("E://QAP_201711281836.txt","E://out12.txt");//1025ms
 //		writeFileByDataOutputStream("E://test.txt");
 		long testTime2 = System.currentTimeMillis();
 		System.out.print(testTime2-testTime1);

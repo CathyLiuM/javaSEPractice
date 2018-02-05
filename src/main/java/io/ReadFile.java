@@ -31,6 +31,14 @@ import org.apache.commons.io.LineIterator;
  * 2.InputStreamReader可以把InputStream转为Reader,OutputStreamWriter可以把OutputStream转为Writer。
  * 3.设计Reader和Writer继承层次结构主要是为了支持处理16位的Unicode字符，且它的操作比旧类库更快
  * 4.明智的做法：尽量尝试Reader/Writer，一旦程序代码无法成功编译，再使用面向字节的类库。
+ * 5.字节流与字符流：
+ *  什么事字符流：字符流是可以直接读写字符的IO流，字符流读取字符, 就要先读取到字节数据, 然后转为字符. 如果要写出字符, 需要把字符转为字节再写出.
+ * 	字符流不能拷贝非纯文本的文件，因为在读的时候会将字节转换为字符,在转换过程中,可能找不到对应的字符,就会用?代替,写出的时候会将字符转换成字节写出去。
+ * 	什么情况下使用字符流：字符流也可以拷贝文本文件, 但不推荐使用. 因为读取时会把字节转为字符, 写出时还要把字符转回字节.
+					 *程序需要读取一段文本, 或者需要写出一段文本的时候可以使用字符流
+					 *读取的时候是按照字符的大小读取的,不会出现半个中文
+					 *写出的时候可以直接将字符串写出,不用转换为字节数组
+ *
  */
 public class ReadFile {
 	/**
@@ -233,6 +241,7 @@ public class ReadFile {
 		ByteBuffer bb = ByteBuffer.allocate(1024);
 		while(read.read(bb)!=-1){
 			bb.flip();//做好让别人来读取字节的准备
+			writer.position(writer.size());
 			writer.write(bb);
 			bb.clear();
 		}
@@ -259,6 +268,9 @@ public class ReadFile {
 //			System.out.write(b);
 			writer.write(b, 0, byteread);
 		}
+		long len = writer.length();
+		writer.seek(len);
+		writer.writeBytes(new String("hellooooooo".getBytes(),"iso8859-1")+"\r\n");
 		reader.close();
 		writer.close();
 	}
@@ -308,7 +320,7 @@ public class ReadFile {
 //		readFileByFiles("E://QAP_201711281836.txt");//2482ms
 //		readFileByIOUtil("E://QAP_201711281836.txt");//2317ms
 //		readFileByFilesUtils("E://QAP_201711281836.txt");//3296ms
-//		readFileByFileChannel("E://QAP_201711281836.txt","E://out8.txt");//140ms
+		readFileByFileChannel("E://QAP_201711281836.txt","E://out8.txt");//140ms
 //		readFileByRandomAccessFile("E://QAP_201711281836.txt","E://out2.txt");//125ms
 //		readFileByMappedBuffer("E://QAP_201711281836.txt","E://out9.txt");	//16ms
 		long testTime2 = System.currentTimeMillis();
@@ -317,7 +329,6 @@ public class ReadFile {
 	}
 	/*
 	 * 使用BufferedReader包裹FileReader，使用缓存是很好的用法，
-	 * BufferedInputFile.read()用来从内存中读取数据，
 	 * BufferedReader通常在只有读到空格或者换行符时才会结束读取，攻击者很容易构内存攻击导致系统瘫痪，出于安全考虑推荐使用io包的LineIterator，并且其在性能上也优于普通流，
 	 * DataInputStream主要是用来读取格式化的数据，但是使用readLine()时不要使用DataInputStream，
 	 * 为了读取大量数据，可以采用通道FileChannel和缓冲器ByteBuffer、Scanner、RandomAccessFile、内存映射文件MappedBuffer等。
